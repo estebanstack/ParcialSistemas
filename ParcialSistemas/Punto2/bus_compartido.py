@@ -1,7 +1,7 @@
 import multiprocessing as mp
-import time     
+import time
 import random
-import os       # Permite acceder al PID (ID del proceso)
+import os
 from datetime import datetime
 
 # Funcion que muestra mensajes con formato de bitacora
@@ -17,38 +17,40 @@ def usar_bus(dispositivo_id: int, semaforo: mp.Semaphore):
 
     log(dispositivo_id, "Intentando acceder al bus (adquiriendo semaforo)...")
 
-    semaforo.acquire()  # Bloquea el proceso hasta que el semaforo este disponible
+    # Verificar si el semáforo está disponible (espera si está ocupado)
+    semaforo_acceso = semaforo.acquire(block=False)  # Non-blocking acquire
 
-    try:
-        log(dispositivo_id, "ACCESO CONCEDIDO: utilizando el bus")
+    if semaforo_acceso:
+        try:
+            log(dispositivo_id, "ACCESO CONCEDIDO: utilizando el bus")
 
-        tiempo_uso = 1.0     
-        intervalos = 4       
+            tiempo_uso = 1.0
+            intervalos = 4
 
-        # Bucle que simula el progreso del uso del bus
-        for i in range(intervalos):
-            time.sleep(tiempo_uso / intervalos)   # Espera 1 segundo entre cada mensaje
-            log(dispositivo_id, f"Transfiriendo datos... ({(i+1)*(tiempo_uso/intervalos):.2f}s)")
+            # Bucle que simula el progreso del uso del bus
+            for i in range(intervalos):
+                time.sleep(tiempo_uso / intervalos)   # Espera 1 segundo entre cada mensaje
+                log(dispositivo_id, f"Transfiriendo datos... ({(i+1)*(tiempo_uso/intervalos):.2f}s)")
 
-        # Una vez completada la transferencia, se informa el tiempo total
-        log(dispositivo_id, f"Transferencia finalizada. Tiempo total de uso: {tiempo_uso:.2f}s")
+            # Una vez completada la transferencia, se informa el tiempo total
+            log(dispositivo_id, f"Transferencia finalizada. Tiempo total de uso: {tiempo_uso:.2f}s")
 
-    finally:
-        # Siempre se ejecuta, incluso si ocurre un error: libera el semáforo
-        log(dispositivo_id, "Liberando el bus (liberando semáforo).")
-        semaforo.release()  # Libera el semaforo para que otro proceso pueda usarlo
-
+        finally:
+            # Siempre se ejecuta, incluso si ocurre un error: libera el semáforo
+            log(dispositivo_id, "Liberando el bus (liberando semáforo).")
+            semaforo.release()  # Libera el semáforo para que otro proceso pueda usarlo
+    else:
+        # Si no pudo adquirir el semáforo, se indica que el bus ya está siendo utilizado
+        log(dispositivo_id, "NO ACCESADO: El bus ya está ocupado, esperando turno...")
 
 # Funcion crea e inicia los procesos
 def main():
-
     NUM_DISPOSITIVOS = 6
-
 
     print("\nSimulacion de Bus Compartido con Semaforo\n", flush=True)
     print(f"Dispositivos: {NUM_DISPOSITIVOS} | Cada uno usa el bus por 1 segundo\n", flush=True)
 
-    # Crea un semaforo binario
+    # Crea un semáforo binario
     # Solo un proceso a la vez puede acceder al bus
     semaforo_bus = mp.Semaphore(1)
 
