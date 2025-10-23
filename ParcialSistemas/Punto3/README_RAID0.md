@@ -1,28 +1,14 @@
-# ⚡ Laboratorio: Implementación de RAID 0 en Ubuntu (VirtualBox)
-
-## 👨‍💻 Autor
-**Nombre:** Julián David Briñez Sánchez  
-**Materia:** Sistemas Operativos / Administración de Servidores  
-**Fecha:** _(colocar la fecha de entrega)_  
+# Implementación de RAID 0 en Ubuntu
 
 ---
 
-## 🧠 Objetivo
+## Objetivo
 Implementar un arreglo **RAID 0 (striping)** en una máquina virtual con Ubuntu utilizando discos virtuales adicionales, con el fin de comprender el funcionamiento de la división de datos y el aumento del rendimiento en sistemas Linux.
 
 ---
 
-## ⚙️ Requerimientos
 
-- VirtualBox instalado.
-- Imagen ISO de **Ubuntu Server o Desktop**.
-- **1 disco principal** (para el sistema operativo).
-- **2 discos adicionales** (para el RAID 0), por ejemplo de 1 GB cada uno.
-- Paquete `mdadm` instalado.
-
----
-
-## 🧾 Paso a Paso
+## Paso a Paso
 
 ### 1. Agregar los discos virtuales
 
@@ -30,7 +16,7 @@ Abrir **Configuración → Almacenamiento → Controlador SATA → Agregar disco
 - Crear dos discos nuevos de 1 GB cada uno.  
 - Verificar que aparezcan como `/dev/sdb` y `/dev/sdc` dentro de Ubuntu.
 
-📸 **Pantallazo 1:** configuración de VirtualBox mostrando los 3 discos (sistema + 2 adicionales).
+<img width="519" height="171" alt="image" src="https://github.com/user-attachments/assets/fa7d4013-f79d-4d8b-ad54-d158cc813443" />
 
 ---
 
@@ -42,9 +28,6 @@ En la terminal ejecutar:
 sudo apt update
 sudo apt install mdadm -y
 ```
-
-📸 **Pantallazo 2:** instalación exitosa del paquete `mdadm`.
-
 ---
 
 ### 3. Verificar los discos disponibles
@@ -55,7 +38,7 @@ sudo fdisk -l
 
 Deberían aparecer `/dev/sdb` y `/dev/sdc` como discos sin formato.
 
-📸 **Pantallazo 3:** salida del comando `fdisk -l` mostrando los discos.
+<img width="633" height="315" alt="image" src="https://github.com/user-attachments/assets/36160f2a-c046-4439-a4d0-7b6aa92f1f1d" />
 
 ---
 
@@ -69,7 +52,7 @@ sudo mdadm --create --verbose /dev/md0 --level=0 --raid-devices=2 /dev/sdb /dev/
 - `--level=0` indica que es un **RAID 0 (striping)**.
 - `--raid-devices=2` indica dos discos.
 
-📸 **Pantallazo 4:** confirmación de creación del RAID 0 (cuando pide escribir “yes”).
+<img width="834" height="111" alt="image" src="https://github.com/user-attachments/assets/fc6bbdf1-f46d-440b-b914-bca60ebfba7a" />
 
 ---
 
@@ -85,7 +68,7 @@ y/o
 sudo mdadm --detail /dev/md0
 ```
 
-📸 **Pantallazo 5:** resultado del estado del RAID mostrando los discos activos.
+<img width="789" height="131" alt="image" src="https://github.com/user-attachments/assets/9052fa90-b9cb-458f-9ee5-83071c9253fa" />
 
 ---
 
@@ -102,7 +85,7 @@ sudo mkdir /mnt/raid0
 sudo mount /dev/md0 /mnt/raid0
 ```
 
-📸 **Pantallazo 6:** salida de `df -h` mostrando `/dev/md0` montado.
+<img width="816" height="552" alt="image" src="https://github.com/user-attachments/assets/69bc28cc-398c-4325-b80e-32194d5bc647" />
 
 ---
 
@@ -118,70 +101,13 @@ Verifica:
 ls /mnt/raid0
 ```
 
-📸 **Pantallazo 7:** contenido de `/mnt/raid0` mostrando el archivo copiado.
+<img width="548" height="68" alt="image" src="https://github.com/user-attachments/assets/109473ed-e121-4cdc-9ea3-2fb8e5025bb4" />
 
 ---
 
-### 8. Hacer el montaje permanente (opcional)
-
-Obtener UUID:
-```bash
-sudo blkid /dev/md0
-```
-
-Editar el archivo `/etc/fstab`:
-```bash
-sudo nano /etc/fstab
-```
-
-Agregar la línea:
-```
-UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  /mnt/raid0  ext4  defaults  0  0
-```
-
-📸 **Pantallazo 8:** línea añadida al final del archivo `/etc/fstab`.
-
----
-
-### 9. Guardar la configuración del RAID
-
-```bash
-sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
-sudo update-initramfs -u
-```
-
-📸 **Pantallazo 9:** comando ejecutado correctamente sin errores.
-
----
-
-### 10. (Opcional) Probar rendimiento
-
-```bash
-sudo dd if=/dev/zero of=/mnt/raid0/testfile bs=1M count=100
-```
-
-📸 **Pantallazo 10:** resultado mostrando la velocidad de escritura (debería ser superior a un disco individual).
-
----
-
-## 🧾 Conclusiones
+## Conclusiones
 
 - El **RAID 0** mejora significativamente el **rendimiento de lectura y escritura** al dividir los datos entre varios discos.  
 - No ofrece **tolerancia a fallos**: si un disco falla, se pierde toda la información.  
 - Es ideal para entornos donde la **velocidad** es prioritaria sobre la seguridad (por ejemplo, procesamiento de video o simulaciones).  
-- `mdadm` facilita la creación, administración y supervisión de arreglos RAID por software en Linux.
 
----
-
-## 📚 Referencias
-
-- [Documentación oficial de mdadm](https://man7.org/linux/man-pages/man8/mdadm.8.html)
-- [Ubuntu RAID Guide](https://help.ubuntu.com/community/Installation/SoftwareRAID)
-
----
-
-> 💡 **Consejo:**  
-> Puedes convertir este README.md en PDF para entrega con:
-> ```bash
-> pandoc README_RAID0.md -o RAID0_Laboratorio.pdf
-> ```
