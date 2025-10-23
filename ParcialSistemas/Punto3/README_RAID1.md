@@ -1,28 +1,14 @@
-# 🧩 Laboratorio: Implementación de RAID 1 en Ubuntu (VirtualBox)
+# Implementación de RAID 1 en Ubuntu
 
-## 👨‍💻 Autor
-**Nombre:** Julián David Briñez Sánchez  
-**Materia:** Sistemas Operativos / Administración de Servidores  
-**Fecha:** _(colocar la fecha de entrega)_  
 
 ---
 
-## 🧠 Objetivo
-Implementar un arreglo **RAID 1 (espejo)** en una máquina virtual con Ubuntu utilizando discos virtuales adicionales, con el fin de comprender cómo funciona la replicación de datos y la tolerancia a fallos en sistemas Linux.
+## Objetivo
+Implementar un arreglo **RAID 1** en una máquina virtual con Ubuntu utilizando discos virtuales adicionales, con el fin de comprender cómo funciona la replicación de datos y la tolerancia a fallos en sistemas Linux.
 
 ---
 
-## ⚙️ Requerimientos
-
-- VirtualBox instalado.
-- Imagen ISO de **Ubuntu Server o Desktop**.
-- **1 disco principal** (para el sistema operativo).
-- **2 discos adicionales** (para el RAID 1), por ejemplo de 1 GB cada uno.
-- Paquete `mdadm` instalado.
-
----
-
-## 🧾 Paso a Paso
+## Paso a Paso
 
 ### 1. Agregar los discos virtuales
 
@@ -30,7 +16,7 @@ Abrir **Configuración → Almacenamiento → Controlador SATA → Agregar disco
 - Crear dos discos nuevos de 1 GB cada uno.  
 - Verificar que aparezcan como `/dev/sdb` y `/dev/sdc` dentro de Ubuntu.
 
-📸 **Pantallazo 1:** configuración de VirtualBox mostrando los 3 discos (sistema + 2 adicionales).
+<img width="465" height="148" alt="image" src="https://github.com/user-attachments/assets/8daa86b9-f845-4133-b392-37793f13ea01" />
 
 ---
 
@@ -43,7 +29,7 @@ sudo apt update
 sudo apt install mdadm -y
 ```
 
-📸 **Pantallazo 2:** instalación exitosa del paquete `mdadm`.
+<img width="1018" height="463" alt="image" src="https://github.com/user-attachments/assets/af6074b2-8194-4ccc-a84b-e6d0da748ea0" />
 
 ---
 
@@ -55,7 +41,8 @@ sudo fdisk -l
 
 Deberían aparecer `/dev/sdb` y `/dev/sdc` como discos sin formato.
 
-📸 **Pantallazo 3:** salida del comando `fdisk -l` mostrando los discos.
+<img width="659" height="286" alt="image" src="https://github.com/user-attachments/assets/b63d47e7-a4b5-46fb-8d2c-82c2cc869620" />
+
 
 ---
 
@@ -69,7 +56,7 @@ sudo mdadm --create --verbose /dev/md0 --level=1 --raid-devices=2 /dev/sdb /dev/
 - `--level=1` indica que es un espejo (RAID 1).
 - `--raid-devices=2` indica dos discos.
 
-📸 **Pantallazo 4:** confirmación de creación del RAID (cuando pide escribir “yes”).
+<img width="1031" height="241" alt="image" src="https://github.com/user-attachments/assets/7ae557c1-432a-48f7-9769-4de4dab1664e" />
 
 ---
 
@@ -85,7 +72,7 @@ y/o
 sudo mdadm --detail /dev/md0
 ```
 
-📸 **Pantallazo 5:** resultado del estado del RAID mostrando los discos activos y la sincronización.
+<img width="996" height="264" alt="image" src="https://github.com/user-attachments/assets/17d32f5c-b250-4f3c-9881-3af97dabbdde" />
 
 ---
 
@@ -102,7 +89,7 @@ sudo mkdir /mnt/raid1
 sudo mount /dev/md0 /mnt/raid1
 ```
 
-📸 **Pantallazo 6:** salida de `df -h` mostrando `/dev/md0` montado.
+<img width="867" height="511" alt="image" src="https://github.com/user-attachments/assets/8f51a822-73cb-4f75-b2fb-c1f8dd23d98c" />
 
 ---
 
@@ -118,78 +105,31 @@ Verifica:
 ls /mnt/raid1
 ```
 
-📸 **Pantallazo 7:** contenido de `/mnt/raid1` mostrando el archivo copiado.
+<img width="554" height="72" alt="image" src="https://github.com/user-attachments/assets/0fa385a7-dd7c-4cce-92d2-e1a417b25da0" />
+
 
 ---
 
-### 8. Hacer el montaje permanente (opcional)
-
-Obtener UUID:
-```bash
-sudo blkid /dev/md0
-```
-
-Editar el archivo `/etc/fstab`:
-```bash
-sudo nano /etc/fstab
-```
-
-Agregar la línea:
-```
-UUID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx  /mnt/raid1  ext4  defaults  0  0
-```
-
-📸 **Pantallazo 8:** línea añadida al final del archivo `/etc/fstab`.
-
----
-
-### 9. Guardar la configuración del RAID
+### 8. Guardar la configuración del RAID
 
 ```bash
 sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
 sudo update-initramfs -u
 ```
 
-📸 **Pantallazo 9:** comando ejecutado correctamente sin errores.
+<img width="860" height="57" alt="image" src="https://github.com/user-attachments/assets/205133f3-afbe-4df1-aab9-a54f75a23d67" />
 
 ---
+### 9. Prueba desmontar raid 1
 
-### 10. (Opcional) Simular un fallo de disco
+<img width="550" height="66" alt="image" src="https://github.com/user-attachments/assets/d4a7edec-b9b1-4125-85ba-b22ac180e815" />
+<img width="891" height="552" alt="image" src="https://github.com/user-attachments/assets/fa6db2c9-3939-49b5-a2e6-8ef2a32904b9" />
 
-```bash
-sudo mdadm --manage /dev/md0 --fail /dev/sdb
-sudo mdadm --manage /dev/md0 --remove /dev/sdb
-```
 
-📸 **Pantallazo 10:** salida mostrando `/dev/sdb` como "failed".
+## Conclusiones
 
-Reemplazar el disco y añadir uno nuevo:
-```bash
-sudo mdadm --manage /dev/md0 --add /dev/sdd
-```
+- El RAID 1 permite mantener **copias idénticas de los datos** en ambos discos, garantizando la **tolerancia a fallos**
+- En caso de que uno de los discos falle, los datos permanecen accesibles en el otro  
+- `mdadm` es una herramienta potente y versátil para gestionar arreglos RAID por software en Linux  
 
-📸 **Pantallazo 11:** estado del RAID restaurado con el nuevo disco.
 
----
-
-## 🧾 Conclusiones
-
-- El RAID 1 permite mantener **copias idénticas de los datos** en ambos discos, garantizando la **tolerancia a fallos**.  
-- En caso de que uno de los discos falle, los datos permanecen accesibles en el otro.  
-- `mdadm` es una herramienta potente y versátil para gestionar arreglos RAID por software en Linux.  
-- Este laboratorio demuestra la importancia de la **redundancia** en los sistemas de almacenamiento.
-
----
-
-## 📚 Referencias
-
-- [Documentación oficial de mdadm](https://man7.org/linux/man-pages/man8/mdadm.8.html)
-- [Ubuntu RAID Guide](https://help.ubuntu.com/community/Installation/SoftwareRAID)
-
----
-
-> 💡 **Consejo:**  
-> Puedes convertir este README.md en PDF para entrega con:
-> ```bash
-> pandoc README.md -o RAID1_Laboratorio.pdf
-> ```
