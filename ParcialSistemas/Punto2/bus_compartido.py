@@ -27,7 +27,7 @@ def usar_bus(dispositivo_id: int, semaforo: mp.Semaphore):
 
         # Bucle que simula el progreso del uso del bus
         for i in range(intervalos):
-            time.sleep(tiempo_uso / intervalos)   # Espera 0.25 segundos entre cada mensaje
+            time.sleep(tiempo_uso / intervalos)   # Espera 1 segundo entre cada mensaje
             log(dispositivo_id, f"Transfiriendo datos... ({(i+1)*(tiempo_uso/intervalos):.2f}s)")
 
         # Una vez completada la transferencia, se informa el tiempo total
